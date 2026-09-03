@@ -53,6 +53,7 @@ export default function App() {
   const [playing, setPlaying] = useState(false);
   const [finished, setFinished] = useState(false);
   const [confetti, setConfetti] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false); // mobile: analysis card becomes a toggled bottom sheet
   const elapsedRef = useRef(0);
   const confTimer = useRef<number | null>(null);
   const idx = CORRIDORS.findIndex((x) => x.id === sel);
@@ -228,13 +229,15 @@ export default function App() {
       <div className="legend-panel">
         <div className="brand-title">NYC Bus-Lane Corridors</div>
         <div className="brand-sub">The 5 busiest Manhattan routes with a bus-only lane</div>
-        {CORRIDORS.map((x, i) => (
-          <button key={x.id} className={`leg-row ${x.id === sel ? 'active' : ''}`} onClick={() => setSel(x.id)} style={{ ['--c' as any]: `rgb(${x.color.join(',')})` }}>
-            <span className="rank">#{i + 1}</span>
-            <span className="dot" style={{ background: `rgb(${x.color.join(',')})` }} />
-            <span className="leg-name">{x.name}<span className="leg-sub">{x.ridersM}M riders/yr</span></span>
-          </button>
-        ))}
+        <div className="leg-rows">
+          {CORRIDORS.map((x, i) => (
+            <button key={x.id} className={`leg-row ${x.id === sel ? 'active' : ''}`} onClick={() => setSel(x.id)} style={{ ['--c' as any]: `rgb(${x.color.join(',')})` }}>
+              <span className="rank">#{i + 1}</span>
+              <span className="dot" style={{ background: `rgb(${x.color.join(',')})` }} />
+              <span className="leg-name">{x.name}<span className="leg-sub">{x.ridersM}M riders/yr</span></span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* simple map legend */}
@@ -244,7 +247,8 @@ export default function App() {
       </div>
 
       {/* concise analysis card */}
-      <div className="analysis" style={{ ['--accent' as any]: `rgb(${cr},${cg},${cb})` }}>
+      <div className={`analysis ${statsOpen ? 'open' : ''}`} style={{ ['--accent' as any]: `rgb(${cr},${cg},${cb})` }}>
+        <button className="sheet-grip" onClick={() => setStatsOpen(false)} aria-label="Close stats" />
         <div className="an-head">
           <span className="an-code">{c.code} · {c.street}</span>
           <span className="an-chip">#{idx + 1} busiest · lane {c.install}</span>
@@ -285,6 +289,14 @@ export default function App() {
           <span className="saved-lab">{saved >= 0 ? 'faster' : 'slower'}</span>
         </div>
       </div>
+
+      {/* mobile-only: open the stats bottom sheet */}
+      {!statsOpen && (
+        <button className="stats-toggle" onClick={() => setStatsOpen(true)} aria-label="Show route stats">
+          <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M4 13h4v7H4v-7Zm6-9h4v16h-4V4Zm6 5h4v11h-4V9Z"/></svg>
+          <span>Stats</span>
+        </button>
+      )}
 
       {/* finish celebration */}
       {finished && (
